@@ -105,11 +105,6 @@ public class PfssDecompressor implements Runnable {
 					
 					Point[] linePoints = new Point[l.size];
 
-					/*int nextIndex = 0;
-					for(int j = 0; j < l.size;j+=2) {
-						linePoints[nextIndex++] = new Point(l.channels[0][j],l.channels[1][j],l.channels[2][j]);
-					}*/
-
 					Point last = new Point(l.channels[0][0],l.channels[1][0],l.channels[2][0]);
 					linePoints[0] = last;
 					int nextIndex = 1;
