@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.helioviewer.base.physics.Constants;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.DeQuantization;
@@ -14,6 +17,7 @@ import org.helioviewer.gl3d.plugin.pfss.data.decompression.Decoder;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.DiscreteCosineTransform;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.Line;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.UnRar;
+import org.helioviewer.gl3d.plugin.pfss.data.managers.PfssFrameInitializer;
 import org.helioviewer.gl3d.plugin.pfss.settings.PfssSettings;
 
 import com.jogamp.common.nio.Buffers;
@@ -69,41 +73,26 @@ public class PfssDecompressor implements Runnable {
 				Fits fits = new Fits(is, false);
 				BasicHDU hdus[] = fits.read();
 				BinaryTableHDU bhdu = (BinaryTableHDU) hdus[1];
-				double b0 = ((double[]) bhdu.getColumn("B0"))[0];
-				double l0 = ((double[]) bhdu.getColumn("L0"))[0];
-				byte[] startR = ((byte[][]) bhdu.getColumn("StartPointR"))[0];
-				byte[] startPhi = ((byte[][]) bhdu.getColumn("StartPointPhi"))[0];
-				byte[] startTheta = ((byte[][]) bhdu.getColumn("StartPointTheta"))[0];
+				byte[] startEnd = ((byte[][]) bhdu.getColumn("START_END"))[0];
 				byte[] line_length = ((byte[][]) bhdu.getColumn("LINE_LENGTH"))[0];
 				byte[] xRaw = ((byte[][]) bhdu.getColumn("X"))[0];
 				byte[] yRaw = ((byte[][]) bhdu.getColumn("Y"))[0];
 				byte[] zRaw = ((byte[][]) bhdu.getColumn("Z"))[0];
 				
-				int[] startRInt = Decoder.decodeAdaptive(startR);
-				int[] startPhiInt = Decoder.decodeAdaptive(startPhi);
-				int[] startThetaInt = Decoder.decodeAdaptive(startTheta);
+				int[] startEndPoints = Decoder.decodeAdaptiveUnsigned(startEnd);
 				int[] lengths = Decoder.decodeAdaptiveUnsigned(line_length);
 				int[] xInt = Decoder.decodeAdaptive(xRaw);
 				int[] yInt = Decoder.decodeAdaptive(yRaw);
 				int[] zInt = Decoder.decodeAdaptive(zRaw);
 
-				Line[] lines = Line.splitToLines(lengths, xInt, yInt, zInt);
-				Line.addStartPoint(lines, startRInt, startPhiInt, startThetaInt, l0, b0);
+				Line[] lines = Line.splitToLines(lengths, startEndPoints, xInt, yInt, zInt);
 				
-				//DeQuantization.multiplyLinear(lines, 20, 0);
-				DeQuantization.multiplyLinear(lines, 30, 5, 0, 10);
-				DeQuantization.multiplyLinear(lines, 100, 0, 10, 8);
-				DeQuantization.multiplyLinear(lines, 110, 5, 18, 7);
-				DeQuantization.multiplyLinear(lines, 155, 0, 25, 10);
-				//DeQuantization.multiplyLinear(lines, 400, 20, 20, 15);
-				DeQuantization.multiply(lines, 1000,0);
-				//DeQuantization.multiplyPoint(lines, 800,0);
+				//DeQuantization.MultiplyLinear(lines, 360, 1, 1);
+				DeQuantization.Multiply(lines, 1000);
+				DeQuantization.MultiplyPoint(lines, 800,0);
 				
 				DiscreteCosineTransform.inverseTransform(lines);
 				
-				for(Line l : lines) {
-					l.integrate();
-				}
 				
 				//subsample for low-end graphic cards. Also count how many points there are for each line type
 				Point[][] points = new Point[lines.length][];
