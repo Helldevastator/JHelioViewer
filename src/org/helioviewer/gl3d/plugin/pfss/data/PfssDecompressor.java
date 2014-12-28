@@ -86,7 +86,7 @@ public class PfssDecompressor implements Runnable {
 
 				Line[] lines = Line.splitToLines(lengths, startEndPoints, xInt, yInt, zInt);
 				
-				DeQuantization.multiplyLinear(lines, 360, 1);
+				DeQuantization.multiplyLinear(lines, 52, 0);
 				DeQuantization.multiply(lines, 1000,0);
 				
 				DiscreteCosineTransform.inverseTransform(lines);

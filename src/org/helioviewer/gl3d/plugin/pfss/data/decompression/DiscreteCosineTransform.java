@@ -7,12 +7,15 @@ package org.helioviewer.gl3d.plugin.pfss.data.decompression;
  */
 public class DiscreteCosineTransform {
 
-    public static void inverseTransform(Line[] lines) {
+	public static void inverseTransform(Line[] lines) {
     	for(Line l : lines) {
     		for(int i = 0; i < l.channels.length;i++) {
-    			int actualSize = l.size;
-    			float[] idct = inverseTransform(l.channels[i], actualSize);
-    			l.channels[i] = idct;
+    			int actualSize = l.size+l.start[i]+l.end[i];
+    			float[] idct = inverseTransform(l.channels[i],actualSize);
+    			
+    			float[] cutOff = new float[l.size];
+    			System.arraycopy(idct, l.start[i], cutOff, 0, l.size);
+    			l.channels[i] = cutOff;
     		}
     	}
     }
