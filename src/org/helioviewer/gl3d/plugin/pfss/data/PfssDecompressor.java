@@ -17,7 +17,6 @@ import org.helioviewer.gl3d.plugin.pfss.data.decompression.Decoder;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.DiscreteCosineTransform;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.Line;
 import org.helioviewer.gl3d.plugin.pfss.data.decompression.UnRar;
-import org.helioviewer.gl3d.plugin.pfss.data.managers.PfssFrameInitializer;
 import org.helioviewer.gl3d.plugin.pfss.settings.PfssSettings;
 
 import com.jogamp.common.nio.Buffers;
@@ -87,9 +86,8 @@ public class PfssDecompressor implements Runnable {
 
 				Line[] lines = Line.splitToLines(lengths, startEndPoints, xInt, yInt, zInt);
 				
-				//DeQuantization.MultiplyLinear(lines, 360, 1, 1);
-				DeQuantization.Multiply(lines, 1000);
-				DeQuantization.MultiplyPoint(lines, 800,0);
+				DeQuantization.multiplyLinear(lines, 360, 1);
+				DeQuantization.multiply(lines, 1000,0);
 				
 				DiscreteCosineTransform.inverseTransform(lines);
 				
