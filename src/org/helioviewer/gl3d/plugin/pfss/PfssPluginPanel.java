@@ -191,7 +191,6 @@ public class PfssPluginPanel extends OverlayPanel implements ActionListener,
 				retry = true;
 				while(retry) {
 				try {
-					Interval<Date> interval = LayersModel.getSingletonInstance().getFrameInterval();
 					renderer.setDisplayRange(start, end);
 					retry = false;
 				} catch (IOException e) {
