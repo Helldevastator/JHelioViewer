@@ -32,5 +32,7 @@
 	<classpathentry kind="lib" path="lib/xuggle-xuggler-5.4.jar"/>
 	<classpathentry kind="lib" path="lib/java-unrar-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/tika-app-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/JTransforms-3.0-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/JTransforms-3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
