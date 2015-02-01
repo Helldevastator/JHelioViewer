@@ -97,7 +97,7 @@ public class IntermediateLineData {
 				 int index = indices[j];
 				 
 				 int runLength = channels[j][index++]; //decode RLE
-				 float[] channel = toFloat(channels[j],index,runLength);
+				 float[] channel = toFloat(channels[j],index,runLength,l.size);
 				 l.channels[j] = channel;
 				 
 				 index += runLength;
@@ -117,8 +117,8 @@ public class IntermediateLineData {
 	 * @param length
 	 * @return
 	 */
-	private static float[] toFloat(int[] data,int start, int length) {
-		float[] out = new float[length];
+	private static float[] toFloat(int[] data,int start, int length,int actual) {
+		float[] out = new float[actual];
 		for(int i = start; i < length+start;i++) {
 			out[i-start] = data[i];
 		}

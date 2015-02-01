@@ -3,13 +3,15 @@ package org.helioviewer.gl3d.plugin.pfss.data.decompression;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
+import org.jtransforms.dct.FloatDCT_1D;
+
 /**
  * Implementation of the discrete cosine transformation used in this plugin
  * @author Jonas Schwammberger
  *
  */
 public class DiscreteCosineTransform {
-    private static HashMap<Integer, SoftReference<float[][]>> coefficientSoftCache = new HashMap<>(500,1.0f);
+    public static HashMap<Integer, SoftReference<FloatDCT_1D>> coefficientSoftCache = new HashMap<>(500,1.0f);
 	/**
 	 * calculates the inverse DCT for all channels of all lines.
 	 * @param lines lines to decompress
@@ -17,33 +19,34 @@ public class DiscreteCosineTransform {
     public static void inverseTransform(IntermediateLineData[] lines) {
     	for(IntermediateLineData l : lines) {
     		//get cached coefficients
-    		SoftReference<float[][]> dcCacheRef = null;
+    		SoftReference<FloatDCT_1D> dcCacheRef = null;
     		synchronized(coefficientSoftCache) {
     			dcCacheRef = coefficientSoftCache.get(l.size);
     		}
     		boolean newToCache = false;
-    		float[][] dcCache = null;
+    		FloatDCT_1D transformer = null;
     		if(dcCacheRef == null) {
-    			dcCache = new float[l.size][l.size];
+    			transformer = new FloatDCT_1D(l.size);
     			newToCache = true;
     		} else {
-    			dcCache = dcCacheRef.get();
-    			if(dcCache == null)
+    			transformer = dcCacheRef.get();
+    			if(transformer == null)
     			{
-    				dcCache = new float[l.size][l.size];
+    				transformer = new FloatDCT_1D(l.size);
     				newToCache = true;
     			}
     		}
 
     		for(int i = 0; i < l.channels.length;i++) {
     			int actualSize = l.size;
-    			float[] idct = inverseTransform(l.channels[i], actualSize,dcCache);
-    			l.channels[i] = idct;
+    			transformer.inverse(l.channels[i], false);
+    			//float[] idct = inverseTransform(l.channels[i], actualSize,transformer);
+    			//l.channels[i] = idct;
     		}
     		
     		if(newToCache) {
     			synchronized(coefficientSoftCache) {
-    				coefficientSoftCache.put(l.size, new SoftReference<float[][]>(dcCache));
+    				coefficientSoftCache.put(l.size, new SoftReference<FloatDCT_1D>(transformer));
     			}
     		}
     	}
@@ -76,5 +79,9 @@ public class DiscreteCosineTransform {
             
         }
         return output;
+    }
+    
+    private static void jTransform(float[] value, FloatDCT_1D transformer) {
+    	transformer.inverse(value, false);
     }
 }
